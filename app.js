@@ -27,7 +27,7 @@ const categories = [
   },
   {
     name: 'Worth-the-Calories Factor',
-    desc: 'Was this indulgence justified? Did it feel like a proper splurge?'
+    desc: ''
   },
   {
     name: 'Lagniappe',
@@ -41,6 +41,7 @@ const fields = {
   restaurant: document.getElementById('restaurant'),
   burgerType: document.getElementById('burgerType'),
   bestWith: document.getElementById('bestWith'),
+  tieBreakerSelect: document.getElementById('tieBreakerSelect'),
   tieNotes: document.getElementById('tieNotes')
 };
 
@@ -139,6 +140,7 @@ function getFormData() {
     restaurant: fields.restaurant.value,
     burgerType: fields.burgerType.value.trim(),
     bestWith: fields.bestWith.value.trim(),
+    tieBreaker: fields.tieBreakerSelect.value,
     tieNotes: fields.tieNotes.value.trim(),
     scores,
     total: scores.reduce((sum, item) => sum + item.score, 0),
@@ -155,6 +157,7 @@ function populateForm(review = {}) {
   fields.restaurant.value = review.restaurant || '';
   fields.burgerType.value = review.burgerType || '';
   fields.bestWith.value = review.bestWith || '';
+  fields.tieBreakerSelect.value = review.tieBreaker || fields.tieBreakerSelect.options[0].value;
   fields.tieNotes.value = review.tieNotes || '';
 
   categories.forEach((_, index) => {
