@@ -26,10 +26,6 @@ const categories = [
     desc: 'Portion size, quality for the price, and whether you would feel good ordering it again.'
   },
   {
-    name: 'Worth-the-Calories Factor',
-    desc: ''
-  },
-  {
     name: 'Lagniappe',
     desc: 'The little something extra: house sauce, special grind, bacon jam, killer pickles, or swagger.'
   }
@@ -214,7 +210,7 @@ function openMyReviews() {
         <div class="review-meta">
           ${escapeHtml(review.burgerType || 'Burger')}<br>
           ${escapeHtml(review.date || 'No date')}<br>
-          Score: ${review.total || 0}/80
+          Score: ${review.total || 0}/70
         </div>
         <div class="review-actions">
           <button class="button button-secondary small-button" type="button" data-load-id="${review.id}">Open</button>

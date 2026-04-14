@@ -28,3 +28,8 @@ GitHub Pages-ready mobile burger scorecard.
 ## Notes
 - Reviews save locally in the browser on that device.
 - `Code.gs` is included only for future central sync work.
+
+
+## Latest update
+- Removed the Worth-the-Calories Factor category from the scorecard
+- Total score is now out of 70
