@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7a2e1f" />
+  <meta name="description" content="Oxford Burger Battle mobile scorecard and review tracker." />
+  <title>Oxford Burger Battle</title>
+  <style>
+    :root {
+      --bg: #f6efe4;
+      --card: #fffdf9;
+      --ink: #2b2218;
+      --muted: #6a5a48;
+      --accent: #7a2e1f;
+      --accent-2: #b68a4a;
+      --line: #ddcfbb;
+      --soft: #f0e6d8;
+      --success: #1f6b43;
+      --danger: #8d2b2b;
+      --shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+      --radius: 18px;
+      --sticky-offset: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background: linear-gradient(180deg, #f3eadb 0%, #faf7f0 100%);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    .app-shell {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 16px 16px 120px;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #f9f1e6;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      line-height: 1.05;
+      color: var(--accent);
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff6ec;
+      border: 1px solid #ecd5b0;
+      font-size: 0.92rem;
+      color: #5d4633;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.95fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1.5px solid var(--line);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .panel h2,
+    .panel h3 {
+      margin: 0 0 14px;
+      color: var(--accent);
+      line-height: 1.15;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .small-note {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .field label,
+    .score-row label,
+    .notes label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 0.96rem;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 14px;
+      border: 1.5px solid #cebca4;
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+      outline: 3px solid rgba(122, 46, 31, 0.16);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      line-height: 1.4;
+    }
+
+    .score-table {
+      display: grid;
+      gap: 12px;
+    }
+
+    .score-row {
+      border: 1.5px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      background: #fffefb;
+    }
+
+    .score-row .top {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 96px;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .score-row h3 {
+      margin: 0;
+      font-size: 1.02rem;
+      color: #3b2a1b;
+    }
+
+    .score-row p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+      line-height: 1.4;
+    }
+
+    .score-input input {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+
+    .summary-box,
+    .tie-breaker,
+    .saved-reviews,
+    .awards-card,
+    .contenders-card {
+      background: var(--soft);
+      border: 1.5px solid #dccaaa;
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .summary-top {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .total {
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 700;
+      color: var(--accent);
+      margin: 8px 0 0;
+      line-height: 1;
+    }
+
+    .total-caption {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    .score-band {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .score-badge {
+      background: #fff;
+      border: 1px solid #e5d3b9;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.87rem;
+      color: #5d4633;
+    }
+
+    .score-badge strong {
+      display: block;
+      font-size: 1rem;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .tie-breaker strong,
+    .saved-reviews strong,
+    .contenders-card strong,
+    .awards-card strong {
+      color: var(--accent);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .contenders-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .chip {
+      background: #fff;
+      border: 1.5px solid var(--line);
+      border-radius: 999px;
+      padding: 12px 14px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .awards {
+      display: grid;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .saved-reviews-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .saved-item {
+      background: #fff;
+      border: 1px solid #e4d2b8;
+      border-radius: 14px;
+      padding: 12px;
+    }
+
+    .saved-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .saved-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+
+    .saved-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .button,
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      min-height: 48px;
+      transition: transform 0.08s ease, opacity 0.15s ease;
+    }
+
+    .button:active,
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .button-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .button-secondary {
+      background: #ebddca;
+      color: var(--ink);
+    }
+
+    .button-danger {
+      background: #f6e2e2;
+      color: var(--danger);
+    }
+
+    .button-success {
+      background: #e0efe7;
+      color: var(--success);
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .footer-note {
+      margin-top: 16px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .sticky-bar {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: var(--sticky-offset);
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 10px;
+      background: rgba(255, 252, 247, 0.96);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(216, 201, 179, 0.92);
+      border-radius: 18px;
+      padding: 10px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
+    }
+
+    .install-banner {
+      display: none;
+      margin-top: 14px;
+      background: #fff7ed;
+      border: 1px solid #f0d2aa;
+      border-radius: 16px;
+      padding: 12px;
+      color: #6b4d34;
+    }
+
+    .install-banner.show {
+      display: block;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 980px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        padding: 12px 12px 118px;
+      }
+
+      .hero,
+      .panel {
+        border-radius: 20px;
+        padding: 16px;
+      }
+
+      .meta,
+      .action-grid,
+      .score-band,
+      .sticky-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .score-row .top {
+        grid-template-columns: 1fr;
+      }
+
+      .score-input {
+        max-width: 120px;
+      }
+
+      .saved-item-top {
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+
+      .app-shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .hero,
+      .panel,
+      .summary-box,
+      .tie-breaker,
+      .saved-reviews,
+      .awards-card,
+      .contenders-card {
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .sticky-bar,
+      .install-banner,
+      .action-grid,
+      .saved-reviews {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero">
+      <div class="eyebrow">Oxford • Burger Battle • Mobile Ready</div>
+      <h1>Battle of the Burgers 2026</h1>
+      <p class="subtitle">A GitHub Pages-ready scorecard built for iPhone, Android, and desktop. Reviews are saved on the device using browser storage, so there is no hosting bill and no database bill.</p>
+      <div class="status-row">
+        <div class="pill">Works offline after first load</div>
+        <div class="pill">Installable on phone home screen</div>
+        <div class="pill">Local saved reviews by reviewer</div>
+      </div>
+      <div class="install-banner" id="installBanner">
+        <strong>Add to Home Screen:</strong> Use the install button below when available, or use your browser share menu and choose <em>Add to Home Screen</em>.
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="panel">
+        <div class="section-head">
+          <h2>Scorecard</h2>
+          <div class="small-note">Scores auto-total to 80</div>
+        </div>
+
+        <div class="meta">
+          <div class="field">
+            <label for="reviewer">Reviewer</label>
+            <input id="reviewer" type="text" placeholder="Your name" autocomplete="name" />
+          </div>
+          <div class="field">
+            <label for="date">Date</label>
+            <input id="date" type="date" />
+          </div>
+          <div class="field">
+            <label for="restaurant">Restaurant</label>
+            <select id="restaurant">
+              <option value="">Choose a stop</option>
+              <option>Handy Andy</option>
+              <option>Phillips Grocery</option>
+              <option>Good Day</option>
+              <option>Blind Pig</option>
+              <option>Bim Bam Burgers</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="burgerType">Burger Name or Type</label>
+            <input id="burgerType" type="text" placeholder="Cheeseburger, double, specialty, etc." />
+          </div>
+        </div>
+
+        <div class="score-table" id="scoreTable"></div>
+
+        <div class="summary-box">
+          <div class="summary-top">
+            <div>
+              <strong>Total Score</strong>
+              <div class="total"><span id="totalScore">0</span> / 80</div>
+              <div class="total-caption" id="scoreVerdict">Start scoring to build the case.</div>
+            </div>
+            <div class="field" style="min-width: min(100%, 280px);">
+              <label for="bestWith">Best with</label>
+              <input id="bestWith" type="text" placeholder="Fries, onion rings, beer, late night, hangover..." />
+            </div>
+          </div>
+
+          <div class="score-band">
+            <div class="score-badge"><strong>70–80</strong> Verdict: elite</div>
+            <div class="score-badge"><strong>60–69</strong> Serious contender</div>
+            <div class="score-badge"><strong>50–59</strong> Respectable stop</div>
+            <div class="score-badge"><strong>Below 50</strong> Case dismissed</div>
+          </div>
+        </div>
+
+        <div class="tie-breaker">
+          <strong>Tie-Breaker</strong>
+          Which burger established a prima facie case for superiority, survived heightened scrutiny, and left the opposition with no remedy at law?
+          <div class="notes" style="margin-top: 12px;">
+            <label for="tieNotes">Your ruling</label>
+            <textarea id="tieNotes" placeholder="Enter the court's findings here..."></textarea>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button class="button button-success" id="saveReviewBtn" type="button">Save Review</button>
+          <button class="button button-secondary" id="newReviewBtn" type="button">New Review</button>
+          <button class="button button-secondary" id="loadReviewsBtn" type="button">Load My Reviews</button>
+          <button class="button button-secondary" id="exportBtn" type="button">Export JSON</button>
+          <button class="button button-secondary" id="installBtn" type="button">Install App</button>
+          <button class="button button-danger" id="deleteBtn" type="button">Delete Current</button>
+        </div>
+      </section>
+
+      <aside class="panel">
+        <div class="contenders-card">
+          <strong>Oxford Contenders</strong>
+          <div class="contenders-list">
+            <div class="chip">Handy Andy</div>
+            <div class="chip">Phillips Grocery</div>
+            <div class="chip">Good Day</div>
+            <div class="chip">Blind Pig</div>
+            <div class="chip">Bim Bam Burgers</div>
+          </div>
+        </div>
+
+        <div class="awards-card">
+          <strong>Awards</strong>
+          <div class="awards">
+            <div class="field">
+              <label for="bestOverall">Best Overall</label>
+              <input id="bestOverall" type="text" placeholder="Winner" />
+            </div>
+            <div class="field">
+              <label for="bestPatty">Best Patty</label>
+              <input id="bestPatty" type="text" placeholder="Who owned the beef?" />
+            </div>
+            <div class="field">
+              <label for="bestBun">Best Bun</label>
+              <input id="bestBun" type="text" placeholder="Best structure and bite" />
+            </div>
+            <div class="field">
+              <label for="bestValue">Best Value</label>
+              <input id="bestValue" type="text" placeholder="Most bang for the buck" />
+            </div>
+            <div class="field">
+              <label for="bestWildcard">Best Wildcard</label>
+              <input id="bestWildcard" type="text" placeholder="Surprise favorite" />
+            </div>
+            <div class="field">
+              <label for="returnImmediately">Would Return For Immediately</label>
+              <input id="returnImmediately" type="text" placeholder="No hesitation" />
+            </div>
+          </div>
+        </div>
+
+        <div class="saved-reviews">
+          <strong>Saved Reviews</strong>
+          <div class="small-note">Stored on this phone, tablet, or browser. Use export to back them up.</div>
+          <div class="saved-reviews-list" id="savedReviewsList">
+            <div class="small-note">No saved reviews yet.</div>
+          </div>
+        </div>
+
+        <p class="footer-note">GitHub Pages deployment is simplest with this app as a static site. No server required. No paid database required. Best results come from saving the site to your home screen on iPhone or Android.</p>
+      </aside>
+    </div>
+  </main>
+
+  <div class="sticky-bar">
+    <button class="button button-success" type="button" id="saveStickyBtn">Save</button>
+    <button class="button button-secondary" type="button" id="loadStickyBtn">My Reviews</button>
+    <button class="button button-primary" type="button" id="printStickyBtn">Print</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'oxford-burger-battle-reviews-v1';
+    const AUTOSAVE_KEY = 'oxford-burger-battle-draft-v1';
+    const categories = [
+      { name: 'Appearance', desc: 'Bun-to-burger ratio, visual appeal, cheese melt, freshness of toppings, and overall presentation.' },
+      { name: 'Patty Quality', desc: 'Beef flavor, seasoning, crust or sear, juiciness, and whether it tastes fresh rather than frozen.' },
+      { name: 'Bun Performance', desc: 'Softness, toast level, structure, and ability to hold together without collapsing into evidence.' },
+      { name: 'Toppings & Balance', desc: 'Quality of cheese, lettuce, tomato, onion, pickles, sauces, and how well everything works together.' },
+      { name: 'Flavor & Craveability', desc: 'First-bite impact, overall deliciousness, and whether you immediately want another bite.' },
+      { name: 'Value', desc: 'Portion size, quality for the price, and whether you would feel good ordering it again.' },
+      { name: 'Worth-the-Calories Factor', desc: 'Was this indulgence justified? Did it feel like a proper splurge?' },
+      { name: 'Lagniappe', desc: 'The little something extra: house sauce, special grind, bacon jam, killer pickles, or swagger.' }
+    ];
+
+    const fields = {
+      reviewer: document.getElementById('reviewer'),
+      date: document.getElementById('date'),
+      restaurant: document.getElementById('restaurant'),
+      burgerType: document.getElementById('burgerType'),
+      bestWith: document.getElementById('bestWith'),
+      tieNotes: document.getElementById('tieNotes'),
+      bestOverall: document.getElementById('bestOverall'),
+      bestPatty: document.getElementById('bestPatty'),
+      bestBun: document.getElementById('bestBun'),
+      bestValue: document.getElementById('bestValue'),
+      bestWildcard: document.getElementById('bestWildcard'),
+      returnImmediately: document.getElementById('returnImmediately')
+    };
+
+    const scoreTable = document.getElementById('scoreTable');
+    const totalScore = document.getElementById('totalScore');
+    const scoreVerdict = document.getElementById('scoreVerdict');
+    const savedReviewsList = document.getElementById('savedReviewsList');
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+
+    const buttons = {
+      saveReview: document.getElementById('saveReviewBtn'),
+      newReview: document.getElementById('newReviewBtn'),
+      loadReviews: document.getElementById('loadReviewsBtn'),
+      exportData: document.getElementById('exportBtn'),
+      deleteCurrent: document.getElementById('deleteBtn'),
+      saveSticky: document.getElementById('saveStickyBtn'),
+      loadSticky: document.getElementById('loadStickyBtn'),
+      printSticky: document.getElementById('printStickyBtn')
+    };
+
+    let deferredInstallPrompt = null;
+    let currentReviewId = null;
+
+    function todayIso() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function safeJsonParse(value, fallback) {
+      try {
+        return JSON.parse(value) || fallback;
+      } catch {
+        return fallback;
+      }
+    }
+
+    function getStoredReviews() {
+      return safeJsonParse(localStorage.getItem(STORAGE_KEY), []);
+    }
+
+    function setStoredReviews(reviews) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+    }
+
+    function getDraft() {
+      return safeJsonParse(localStorage.getItem(AUTOSAVE_KEY), null);
+    }
+
+    function setDraft(data) {
+      localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+    }
+
+    function clearDraft() {
+      localStorage.removeItem(AUTOSAVE_KEY);
+    }
+
+    function createScoreRows() {
+      scoreTable.innerHTML = '';
+      categories.forEach((cat, index) => {
+        const row = document.createElement('div');
+        row.className = 'score-row';
+        row.innerHTML = `
+          <div class="top">
+            <div>
+              <h3>${cat.name}</h3>
+              <p>${cat.desc}</p>
+            </div>
+            <div class="score-input">
+              <label for="score-${index}">Score</label>
+              <input id="score-${index}" type="number" inputmode="numeric" min="1" max="10" placeholder="1–10" />
+            </div>
+          </div>
+          <div class="notes">
+            <label for="notes-${index}">Notes</label>
+            <textarea id="notes-${index}" placeholder="What stood out?"></textarea>
+          </div>
+        `;
+        scoreTable.appendChild(row);
+      });
+    }
+
+    function getScoreValue(index) {
+      const value = Number(document.getElementById(`score-${index}`).value);
+      return Number.isFinite(value) ? value : 0;
+    }
+
+    function getScores() {
+      return categories.map((cat, index) => ({
+        category: cat.name,
+        score: getScoreValue(index),
+        notes: document.getElementById(`notes-${index}`).value.trim()
+      }));
+    }
+
+    function getVerdict(total) {
+      if (total >= 70) return 'The court finds this burger elite.';
+      if (total >= 60) return 'A serious contender with persuasive evidence.';
+      if (total >= 50) return 'A respectable stop with a workable case.';
+      if (total > 0) return 'The case remains open, but the record is mixed.';
+      return 'Start scoring to build the case.';
+    }
+
+    function updateTotal() {
+      const total = getScores().reduce((sum, entry) => sum + entry.score, 0);
+      totalScore.textContent = total;
+      scoreVerdict.textContent = getVerdict(total);
+      return total;
+    }
+
+    function buildReviewId(data) {
+      return `${data.reviewer || 'unknown'}__${data.restaurant || 'unknown'}__${data.date || 'undated'}__${data.burgerType || 'burger'}`
+        .toLowerCase()
+        .replace(/[^a-z0-9_\-]+/g, '-');
+    }
+
+    function getFormData() {
+      const scores = getScores();
+      const review = {
+        reviewer: fields.reviewer.value.trim(),
+        date: fields.date.value,
+        restaurant: fields.restaurant.value,
+        burgerType: fields.burgerType.value.trim(),
+        bestWith: fields.bestWith.value.trim(),
+        tieNotes: fields.tieNotes.value.trim(),
+        bestOverall: fields.bestOverall.value.trim(),
+        bestPatty: fields.bestPatty.value.trim(),
+        bestBun: fields.bestBun.value.trim(),
+        bestValue: fields.bestValue.value.trim(),
+        bestWildcard: fields.bestWildcard.value.trim(),
+        returnImmediately: fields.returnImmediately.value.trim(),
+        scores,
+        total: scores.reduce((sum, entry) => sum + entry.score, 0),
+        updatedAt: new Date().toISOString()
+      };
+      review.id = currentReviewId || buildReviewId(review);
+      return review;
+    }
+
+    function populateForm(data = {}) {
+      currentReviewId = data.id || null;
+      fields.reviewer.value = data.reviewer || '';
+      fields.date.value = data.date || todayIso();
+      fields.restaurant.value = data.restaurant || '';
+      fields.burgerType.value = data.burgerType || '';
+      fields.bestWith.value = data.bestWith || '';
+      fields.tieNotes.value = data.tieNotes || '';
+      fields.bestOverall.value = data.bestOverall || '';
+      fields.bestPatty.value = data.bestPatty || '';
+      fields.bestBun.value = data.bestBun || '';
+      fields.bestValue.value = data.bestValue || '';
+      fields.bestWildcard.value = data.bestWildcard || '';
+      fields.returnImmediately.value = data.returnImmediately || '';
+
+      categories.forEach((_, index) => {
+        const score = data.scores?.[index]?.score || '';
+        const notes = data.scores?.[index]?.notes || '';
+        document.getElementById(`score-${index}`).value = score;
+        document.getElementById(`notes-${index}`).value = notes;
+      });
+
+      updateTotal();
+      autoSaveDraft();
+    }
+
+    function resetForm() {
+      currentReviewId = null;
+      fields.reviewer.value = fields.reviewer.value.trim();
+      fields.date.value = todayIso();
+      fields.restaurant.value = '';
+      fields.burgerType.value = '';
+      fields.bestWith.value = '';
+      fields.tieNotes.value = '';
+      fields.bestOverall.value = '';
+      fields.bestPatty.value = '';
+      fields.bestBun.value = '';
+      fields.bestValue.value = '';
+      fields.bestWildcard.value = '';
+      fields.returnImmediately.value = '';
+
+      categories.forEach((_, index) => {
+        document.getElementById(`score-${index}`).value = '';
+        document.getElementById(`notes-${index}`).value = '';
+      });
+
+      updateTotal();
+      autoSaveDraft();
+    }
+
+    function autoSaveDraft() {
+      setDraft(getFormData());
+    }
+
+    function saveReview() {
+      const review = getFormData();
+      if (!review.reviewer) {
+        alert('Enter a reviewer name first.');
+        fields.reviewer.focus();
+        return;
+      }
+      if (!review.restaurant) {
+        alert('Choose a restaurant before saving.');
+        fields.restaurant.focus();
+        return;
+      }
+
+      const reviews = getStoredReviews();
+      const index = reviews.findIndex((entry) => entry.id === review.id);
+      if (index >= 0) {
+        reviews[index] = review;
+      } else {
+        reviews.push(review);
+      }
+      setStoredReviews(reviews);
+      currentReviewId = review.id;
+      renderSavedReviews();
+      autoSaveDraft();
+      alert('Review saved on this device.');
+    }
+
+    function loadReviewById(id) {
+      const review = getStoredReviews().find((entry) => entry.id === id);
+      if (!review) return;
+      populateForm(review);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteCurrentReview() {
+      const review = getFormData();
+      if (!review.id) {
+        alert('There is no saved review loaded.');
+        return;
+      }
+      const reviews = getStoredReviews();
+      const nextReviews = reviews.filter((entry) => entry.id !== review.id);
+      if (nextReviews.length === reviews.length) {
+        alert('This review has not been saved yet.');
+        return;
+      }
+      setStoredReviews(nextReviews);
+      currentReviewId = null;
+      renderSavedReviews();
+      resetForm();
+      alert('Current review deleted.');
+    }
+
+    function loadReviewerReviews() {
+      const reviewer = fields.reviewer.value.trim().toLowerCase();
+      if (!reviewer) {
+        alert('Enter a reviewer name first.');
+        fields.reviewer.focus();
+        return;
+      }
+      const matches = getStoredReviews()
+        .filter((entry) => (entry.reviewer || '').trim().toLowerCase() === reviewer)
+        .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+      if (!matches.length) {
+        renderSavedReviews([]);
+        alert('No saved reviews found for that reviewer on this device.');
+        return;
+      }
+
+      renderSavedReviews(matches, true);
+    }
+
+    function exportReviewerData() {
+      const reviewer = fields.reviewer.value.trim().toLowerCase();
+      if (!reviewer) {
+        alert('Enter a reviewer name first.');
+        fields.reviewer.focus();
+        return;
+      }
+      const matches = getStoredReviews().filter((entry) => (entry.reviewer || '').trim().toLowerCase() === reviewer);
+      const blob = new Blob([JSON.stringify(matches, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${reviewer.replace(/\s+/g, '_') || 'reviewer'}_burger_reviews.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function renderSavedReviews(reviewSubset = null, highlightSubset = false) {
+      const reviews = (reviewSubset || getStoredReviews())
+        .slice()
+        .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+      if (!reviews.length) {
+        savedReviewsList.innerHTML = '<div class="small-note">No saved reviews yet.</div>';
+        return;
+      }
+
+      savedReviewsList.innerHTML = reviews.map((review) => `
+        <article class="saved-item">
+          <div class="saved-item-top">
+            <div>
+              <strong>${escapeHtml(review.restaurant || 'Unknown stop')}</strong>
+              <div class="saved-meta">${escapeHtml(review.burgerType || 'Burger')} • ${escapeHtml(review.date || 'No date')} • ${escapeHtml(review.reviewer || 'Unknown reviewer')}</div>
+            </div>
+            <div class="pill"><strong style="margin:0; color:inherit;">${review.total || 0}/80</strong></div>
+          </div>
+          <div class="saved-actions">
+            <button class="button button-secondary" type="button" data-load-id="${review.id}">Open</button>
+          </div>
+        </article>
+      `).join('');
+
+      if (highlightSubset) {
+        savedReviewsList.insertAdjacentHTML('afterbegin', '<div class="small-note">Showing saved reviews for this reviewer.</div>');
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      const swCode = `
+        const CACHE_NAME = 'oxford-burger-battle-cache-v1';
+        const APP_SHELL = ['./'];
+        self.addEventListener('install', event => {
+          event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', event => {
+          event.waitUntil(self.clients.claim());
+        });
+        self.addEventListener('fetch', event => {
+          if (event.request.method !== 'GET') return;
+          event.respondWith(
+            caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
+              const cloned = response.clone();
+              caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
+              return response;
+            }).catch(() => caches.match('./')))
+          );
+        });
+      `;
+      const blob = new Blob([swCode], { type: 'text/javascript' });
+      const swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(() => {});
+    }
+
+    function setManifest() {
+      const manifest = {
+        name: 'Oxford Burger Battle',
+        short_name: 'Burger Battle',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#f6efe4',
+        theme_color: '#7a2e1f',
+        description: 'Oxford Burger Battle mobile scorecard and review tracker.',
+        icons: []
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      const manifestUrl = URL.createObjectURL(blob);
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestUrl;
+      document.head.appendChild(link);
+    }
+
+    function wireEvents() {
+      document.addEventListener('input', (event) => {
+        if (event.target.matches('input[type="number"]')) {
+          const value = Number(event.target.value);
+          if (value > 10) event.target.value = 10;
+          if (value < 1 && event.target.value !== '') event.target.value = 1;
+          updateTotal();
+        }
+        autoSaveDraft();
+      });
+
+      document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-load-id]');
+        if (!button) return;
+        loadReviewById(button.getAttribute('data-load-id'));
+      });
+
+      buttons.saveReview.addEventListener('click', saveReview);
+      buttons.newReview.addEventListener('click', resetForm);
+      buttons.loadReviews.addEventListener('click', loadReviewerReviews);
+      buttons.exportData.addEventListener('click', exportReviewerData);
+      buttons.deleteCurrent.addEventListener('click', deleteCurrentReview);
+      buttons.saveSticky.addEventListener('click', saveReview);
+      buttons.loadSticky.addEventListener('click', loadReviewerReviews);
+      buttons.printSticky.addEventListener('click', () => window.print());
+      installBtn.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+          deferredInstallPrompt.prompt();
+          await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          installBanner.classList.remove('show');
+        } else {
+          alert('On iPhone, use Share → Add to Home Screen. On Android, use the browser menu or install prompt.');
+        }
+      });
+
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        installBanner.classList.add('show');
+      });
+    }
+
+    function init() {
+      createScoreRows();
+      setManifest();
+      registerServiceWorker();
+      wireEvents();
+      populateForm(getDraft() || { date: todayIso() });
+      renderSavedReviews();
+    }
+
+    init();
+  </script>
+</body>
+</html>
