@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#7a2e1f" />
-  <meta name="description" content="Oxford Burger Battle scorecard" />
+  <meta name="theme-color" content="#ce1126" />
+  <meta name="description" content="Oxford Burger Battle mobile scorecard." />
   <title>Oxford Burger Battle</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app-shell">
-    <header class="hero">
+    <section class="hero">
       <div class="eyebrow">Oxford Burger Battle</div>
-      <h1>Burger Battle Scorecard</h1>
-      <p class="subtitle">Mobile-first, GitHub Pages-ready, with local saves and optional Google Sheets sync.</p>
-    </header>
+      <h1>Battle of the Burgers 2026</h1>
+      <p class="subtitle">Mobile-ready burger scorecard built for GitHub Pages.</p>
+    </section>
 
-    <section class="card">
-      <div class="meta-grid">
+    <section class="panel">
+      <div class="section-head">
+        <h2>Scorecard</h2>
+        <div class="small-note">Total score out of 80</div>
+      </div>
+
+      <div class="meta">
         <div class="field">
           <label for="reviewer">Reviewer</label>
-          <select id="reviewer" required>
-            <option value="">Select reviewer</option>
+          <select id="reviewer">
+            <option value="">Choose reviewer</option>
             <option>James</option>
             <option>Jessica</option>
             <option>Lori</option>
@@ -30,16 +35,14 @@
             <option>Vincent</option>
           </select>
         </div>
-
         <div class="field">
           <label for="date">Date</label>
           <input id="date" type="date" />
         </div>
-
         <div class="field">
           <label for="restaurant">Restaurant</label>
-          <select id="restaurant" required>
-            <option value="">Select restaurant</option>
+          <select id="restaurant">
+            <option value="">Choose a stop</option>
             <option>Phillips Grocery</option>
             <option>Bim Bam</option>
             <option>Good Day</option>
@@ -48,90 +51,49 @@
             <option>City Grocery</option>
           </select>
         </div>
-
         <div class="field">
-          <label for="burgerName">Burger Name or Type</label>
-          <input id="burgerName" type="text" placeholder="Cheeseburger, double, specialty, etc." />
+          <label for="burgerType">Burger Name or Type</label>
+          <input id="burgerType" type="text" placeholder="Cheeseburger, double, specialty, etc." />
         </div>
       </div>
-    </section>
 
-    <section class="score-list" id="scoreList"></section>
+      <div id="scoreTable" class="score-table"></div>
 
-    <section class="card summary-card">
-      <div class="summary-top">
+      <div class="summary-box">
         <div>
-          <div class="summary-label">Total Score</div>
+          <strong>Total Score</strong>
           <div class="total"><span id="totalScore">0</span> / 80</div>
-          <div class="score-note" id="scoreNote">Start scoring to build the case.</div>
+          <div class="total-caption" id="scoreVerdict">Start scoring to build the case.</div>
         </div>
-        <div class="field compact-field">
+        <div class="field best-with-field">
           <label for="bestWith">Best with</label>
-          <input id="bestWith" type="text" placeholder="Fries, beer, onion rings..." />
+          <input id="bestWith" type="text" placeholder="Fries, onion rings, beer, late night..." />
         </div>
       </div>
-    </section>
 
-    <section class="card">
-      <div class="field">
-        <label for="tieNotes">Tie-Breaker Ruling</label>
-        <p class="prompt">Which burger established a prima facie case for superiority, survived heightened scrutiny, and left the opposition with no remedy at law?</p>
-        <textarea id="tieNotes" placeholder="Enter the court's findings here..."></textarea>
+      <div class="tie-breaker">
+        <strong>Tie-Breaker</strong>
+        <p>Which burger established a prima facie case for superiority, survived heightened scrutiny, and left the opposition with no remedy at law?</p>
+        <div class="notes">
+          <label for="tieNotes">Your ruling</label>
+          <textarea id="tieNotes" placeholder="Enter the court's findings here..."></textarea>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="saveBtn" class="button button-primary" type="button">Save</button>
+        <button id="myReviewsBtn" class="button button-secondary" type="button">My Reviews</button>
       </div>
     </section>
   </main>
 
-  <div class="sticky-bar">
-    <button id="saveBtn" class="btn btn-primary" type="button">Save</button>
-    <button id="reviewsBtn" class="btn btn-secondary" type="button">My Reviews</button>
-    <button id="syncBtn" class="btn btn-secondary" type="button">Sync</button>
-    <button id="submitBtn" class="btn btn-primary" type="button">Submit</button>
-  </div>
-
-  <dialog id="reviewsDialog" class="dialog">
+  <dialog id="reviewsDialog" class="reviews-dialog">
     <div class="dialog-head">
-      <h2>Saved Reviews</h2>
-      <button class="icon-btn" data-close="reviewsDialog" aria-label="Close">×</button>
+      <h3>My Reviews</h3>
+      <button id="closeDialogBtn" class="button button-secondary small-button" type="button">Close</button>
     </div>
-    <p class="dialog-note">Saved locally on this device. Reviews are filtered by the selected reviewer.</p>
-    <div id="reviewsEmpty" class="empty-state">No saved reviews yet.</div>
-    <div id="reviewsContainer" class="reviews-container"></div>
+    <div id="reviewsList" class="reviews-list"></div>
   </dialog>
-
-  <dialog id="syncDialog" class="dialog">
-    <div class="dialog-head">
-      <h2>Sync Settings</h2>
-      <button class="icon-btn" data-close="syncDialog" aria-label="Close">×</button>
-    </div>
-
-    <div class="field">
-      <label for="googleScriptUrl">Google Apps Script Web App URL</label>
-      <input id="googleScriptUrl" type="url" placeholder="Paste the web app URL here" />
-    </div>
-
-    <div class="sync-actions">
-      <button id="saveSyncBtn" class="btn btn-primary" type="button">Save Sync URL</button>
-      <button id="exportBtn" class="btn btn-secondary" type="button">Export My Reviews</button>
-    </div>
-
-    <p class="dialog-note">Use GitHub Pages for hosting and Google Sheets for the shared review database.</p>
-  </dialog>
-
-  <template id="reviewCardTemplate">
-    <article class="review-card">
-      <div class="review-card-top">
-        <div>
-          <h3 class="review-title"></h3>
-          <div class="review-meta"></div>
-        </div>
-        <div class="review-total"></div>
-      </div>
-      <div class="review-actions">
-        <button class="btn btn-secondary open-review" type="button">Open</button>
-        <button class="btn btn-danger delete-review" type="button">Delete</button>
-      </div>
-    </article>
-  </template>
 
   <script src="app.js"></script>
 </body>

@@ -4,8 +4,8 @@ function doPost(e) {
     const sheetName = 'Reviews';
 
     const data = JSON.parse(e.postData.contents);
-    const spreadsheet = SpreadsheetApp.openById(sheetId);
-    const sheet = spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = ss.getSheetByName(sheetName) || ss.insertSheet(sheetName);
 
     if (sheet.getLastRow() === 0) {
       sheet.appendRow([
@@ -14,10 +14,10 @@ function doPost(e) {
         'reviewer',
         'date',
         'restaurant',
-        'burger_name',
+        'burger_type',
+        'total',
         'best_with',
         'tie_notes',
-        'total',
         'scores_json'
       ]);
     }
@@ -28,19 +28,19 @@ function doPost(e) {
       data.reviewer || '',
       data.date || '',
       data.restaurant || '',
-      data.burgerName || '',
+      data.burgerType || '',
+      data.total || 0,
       data.bestWith || '',
       data.tieNotes || '',
-      data.total || 0,
       JSON.stringify(data.scores || [])
     ]);
 
     return ContentService
       .createTextOutput(JSON.stringify({ ok: true }))
       .setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
+  } catch (err) {
     return ContentService
-      .createTextOutput(JSON.stringify({ ok: false, error: String(error) }))
+      .createTextOutput(JSON.stringify({ ok: false, error: String(err) }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
