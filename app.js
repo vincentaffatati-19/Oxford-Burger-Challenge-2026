@@ -1,4 +1,12 @@
-const STORAGE_KEY = 'oxford-burger-battle-reviews-v3';
+const STORAGE_KEY = 'oxford-burger-battle-reviews-v6';
+const RESTAURANTS = [
+  'Phillips Grocery',
+  'Bim Bam',
+  'Good Day',
+  'Handy Andy',
+  'Oxford Burger Co',
+  'City Grocery'
+];
 
 const categories = [
   {
@@ -46,6 +54,11 @@ const totalScore = document.getElementById('totalScore');
 const scoreVerdict = document.getElementById('scoreVerdict');
 const reviewsDialog = document.getElementById('reviewsDialog');
 const reviewsList = document.getElementById('reviewsList');
+const leaderboardList = document.getElementById('leaderboardList');
+const leaderSummary = document.getElementById('leaderSummary');
+const leaderDetailDialog = document.getElementById('leaderDetailDialog');
+const leaderDetailTitle = document.getElementById('leaderDetailTitle');
+const leaderDetailContent = document.getElementById('leaderDetailContent');
 
 let currentReviewId = null;
 
@@ -108,10 +121,10 @@ function getScores() {
 }
 
 function getVerdict(total) {
-  if (total >= 70) return 'The court finds this burger elite.';
-  if (total >= 60) return 'A serious contender with persuasive evidence.';
-  if (total >= 50) return 'A respectable stop with a workable case.';
-  if (total > 0) return 'The case remains open, but the record is mixed.';
+  if (total >= 63) return 'This burger is making a real run at the title.';
+  if (total >= 56) return 'A serious contender with a lot going for it.';
+  if (total >= 49) return 'A respectable stop with some strong moments.';
+  if (total > 0) return 'The record is mixed, but the table has notes.';
   return 'Start scoring to build the case.';
 }
 
@@ -186,6 +199,7 @@ function saveReview() {
   }
   setStoredReviews(reviews);
   currentReviewId = review.id;
+  renderLeaderboard();
   alert('Review saved on this device.');
 }
 
@@ -219,10 +233,22 @@ function openMyReviews() {
     `).join('');
   }
 
-  if (typeof reviewsDialog.showModal === 'function') {
-    reviewsDialog.showModal();
+  openDialog(reviewsDialog);
+}
+
+function openDialog(dialog) {
+  if (typeof dialog.showModal === 'function') {
+    dialog.showModal();
   } else {
-    reviewsDialog.setAttribute('open', 'open');
+    dialog.setAttribute('open', 'open');
+  }
+}
+
+function closeDialog(dialog) {
+  if (typeof dialog.close === 'function') {
+    dialog.close();
+  } else {
+    dialog.removeAttribute('open');
   }
 }
 
@@ -230,8 +256,145 @@ function loadReviewById(id) {
   const review = getStoredReviews().find((entry) => entry.id === id);
   if (!review) return;
   populateForm(review);
-  reviewsDialog.close?.();
+  closeDialog(reviewsDialog);
+  showView('scorecard');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function calculateLeaderboard(reviews) {
+  const grouped = RESTAURANTS.map((restaurant) => {
+    const restaurantReviews = reviews.filter((entry) => entry.restaurant === restaurant);
+    if (!restaurantReviews.length) return null;
+
+    const totals = restaurantReviews.map((entry) => Number(entry.total) || 0);
+    const categoryAverages = categories.map((cat) => {
+      const scores = restaurantReviews.map((entry) => {
+        const match = (entry.scores || []).find((score) => score.category === cat.name);
+        return Number(match?.score) || 0;
+      });
+      const avg = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+      return { category: cat.name, average: avg };
+    });
+
+    const flavorAverage = categoryAverages.find((item) => item.category === 'Flavor & Craveability')?.average || 0;
+    const pattyAverage = categoryAverages.find((item) => item.category === 'Patty Quality')?.average || 0;
+
+    return {
+      restaurant,
+      averageTotal: totals.reduce((sum, total) => sum + total, 0) / totals.length,
+      high: Math.max(...totals),
+      low: Math.min(...totals),
+      reviewCount: restaurantReviews.length,
+      categoryAverages,
+      flavorAverage,
+      pattyAverage,
+      reviews: restaurantReviews.slice().sort((a, b) => a.reviewer.localeCompare(b.reviewer))
+    };
+  }).filter(Boolean);
+
+  grouped.sort((a, b) => {
+    if (b.averageTotal !== a.averageTotal) return b.averageTotal - a.averageTotal;
+    if (b.flavorAverage !== a.flavorAverage) return b.flavorAverage - a.flavorAverage;
+    return b.pattyAverage - a.pattyAverage;
+  });
+
+  return grouped.map((entry, index) => ({ ...entry, rank: index + 1 }));
+}
+
+function renderLeaderboard() {
+  const leaderboard = calculateLeaderboard(getStoredReviews());
+  if (!leaderboard.length) {
+    leaderSummary.innerHTML = '<div class="summary-tile"><strong>Leaderboard</strong><div>No reviews saved yet.</div></div>';
+    leaderboardList.innerHTML = '<div class="review-card">Save some reviews and the leaderboard will appear here.</div>';
+    return;
+  }
+
+  const leader = leaderboard[0];
+  const reviewerCount = new Set(getStoredReviews().map((entry) => entry.reviewer).filter(Boolean)).size;
+  leaderSummary.innerHTML = `
+    <div class="summary-tile">
+      <strong>Current Leader</strong>
+      <div class="summary-value">${escapeHtml(leader.restaurant)}</div>
+    </div>
+    <div class="summary-tile">
+      <strong>Top Average</strong>
+      <div class="summary-value">${leader.averageTotal.toFixed(1)} / 70</div>
+    </div>
+    <div class="summary-tile">
+      <strong>Reviews Counted</strong>
+      <div class="summary-value">${reviewerCount}</div>
+    </div>
+  `;
+
+  leaderboardList.innerHTML = leaderboard.map((entry) => `
+    <article class="leader-card" data-leader-restaurant="${escapeHtml(entry.restaurant)}">
+      <div class="leader-card-top">
+        <div>
+          <h3>#${entry.rank} ${escapeHtml(entry.restaurant)}</h3>
+          <div class="leader-average">Average: ${entry.averageTotal.toFixed(1)} / 70</div>
+          <div class="leader-meta">High: ${entry.high} • Low: ${entry.low}</div>
+        </div>
+        ${entry.rank === 1 ? '<div class="rank-badge">Leader</div>' : ''}
+      </div>
+    </article>
+  `).join('');
+}
+
+function openLeaderDetail(restaurant) {
+  const leaderboard = calculateLeaderboard(getStoredReviews());
+  const entry = leaderboard.find((item) => item.restaurant === restaurant);
+  if (!entry) return;
+
+  leaderDetailTitle.textContent = `${entry.restaurant} — Rank #${entry.rank}`;
+  leaderDetailContent.innerHTML = `
+    <div class="detail-stats">
+      <div class="summary-tile"><strong>Average Total</strong><div class="summary-value">${entry.averageTotal.toFixed(1)}</div></div>
+      <div class="summary-tile"><strong>Highest Score</strong><div class="summary-value">${entry.high}</div></div>
+      <div class="summary-tile"><strong>Lowest Score</strong><div class="summary-value">${entry.low}</div></div>
+      <div class="summary-tile"><strong>Score Range</strong><div class="summary-value">${entry.high - entry.low}</div></div>
+    </div>
+    <section class="detail-section">
+      <h3>Category Averages</h3>
+      <div class="category-averages">
+        ${entry.categoryAverages.map((cat) => `
+          <div class="bar-row">
+            <div class="bar-head"><span>${escapeHtml(cat.category)}</span><span>${cat.average.toFixed(1)}</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.max(0, Math.min(100, cat.average * 10))}%"></div></div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+    <section class="detail-section">
+      <h3>Reviewer Scores</h3>
+      <div class="reviewer-score-list">
+        ${entry.reviews.map((review) => `
+          <div class="review-card">
+            <strong>${escapeHtml(review.reviewer)}</strong>
+            <div class="review-meta">Total: ${review.total}/70${review.burgerType ? `<br>${escapeHtml(review.burgerType)}` : ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `;
+
+  openDialog(leaderDetailDialog);
+}
+
+function showView(viewName) {
+  const scorecardView = document.getElementById('scorecardView');
+  const leaderboardView = document.getElementById('leaderboardView');
+  const showScorecardBtn = document.getElementById('showScorecardBtn');
+  const showLeaderboardBtn = document.getElementById('showLeaderboardBtn');
+
+  const scorecardActive = viewName === 'scorecard';
+  scorecardView.classList.toggle('hidden', !scorecardActive);
+  leaderboardView.classList.toggle('hidden', scorecardActive);
+  showScorecardBtn.classList.toggle('nav-button-active', scorecardActive);
+  showLeaderboardBtn.classList.toggle('nav-button-active', !scorecardActive);
+
+  if (!scorecardActive) {
+    renderLeaderboard();
+  }
 }
 
 function wireEvents() {
@@ -246,18 +409,29 @@ function wireEvents() {
 
   document.addEventListener('click', (event) => {
     const loadBtn = event.target.closest('[data-load-id]');
-    if (loadBtn) loadReviewById(loadBtn.getAttribute('data-load-id'));
+    if (loadBtn) {
+      loadReviewById(loadBtn.getAttribute('data-load-id'));
+      return;
+    }
+    const leaderCard = event.target.closest('[data-leader-restaurant]');
+    if (leaderCard) {
+      openLeaderDetail(leaderCard.getAttribute('data-leader-restaurant'));
+    }
   });
 
   document.getElementById('saveBtn').addEventListener('click', saveReview);
   document.getElementById('myReviewsBtn').addEventListener('click', openMyReviews);
-  document.getElementById('closeDialogBtn').addEventListener('click', () => reviewsDialog.close?.());
+  document.getElementById('closeDialogBtn').addEventListener('click', () => closeDialog(reviewsDialog));
+  document.getElementById('closeLeaderDetailBtn').addEventListener('click', () => closeDialog(leaderDetailDialog));
+  document.getElementById('showScorecardBtn').addEventListener('click', () => showView('scorecard'));
+  document.getElementById('showLeaderboardBtn').addEventListener('click', () => showView('leaderboard'));
 }
 
 function init() {
   createScoreRows();
   populateForm({ date: todayIso() });
   wireEvents();
+  renderLeaderboard();
 }
 
 init();

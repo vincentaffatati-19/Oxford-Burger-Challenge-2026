@@ -16,7 +16,12 @@
       <p class="subtitle">mobile ready burger scorecard for greasy fingers</p>
     </section>
 
-    <section class="panel">
+    <nav class="top-nav" aria-label="Primary">
+      <button id="showScorecardBtn" class="nav-button nav-button-active" type="button">Scorecard</button>
+      <button id="showLeaderboardBtn" class="nav-button" type="button">Leaderboard</button>
+    </nav>
+
+    <section id="scorecardView" class="panel view-panel">
       <div class="section-head">
         <h2>Scorecard</h2>
         <div class="small-note">Total score out of 70</div>
@@ -94,6 +99,19 @@
         <button id="myReviewsBtn" class="button button-secondary" type="button">My Reviews</button>
       </div>
     </section>
+
+    <section id="leaderboardView" class="panel view-panel hidden">
+      <div class="section-head section-head-stack">
+        <div>
+          <h2>Oxford Burger Battle Leaderboard</h2>
+          <div class="small-note">Average scores from all reviewers</div>
+          <div class="small-note">7 categories • 70 points possible</div>
+        </div>
+      </div>
+
+      <div id="leaderSummary" class="leader-summary"></div>
+      <div id="leaderboardList" class="leaderboard-list"></div>
+    </section>
   </main>
 
   <dialog id="reviewsDialog" class="reviews-dialog">
@@ -102,6 +120,14 @@
       <button id="closeDialogBtn" class="button button-secondary small-button" type="button">Close</button>
     </div>
     <div id="reviewsList" class="reviews-list"></div>
+  </dialog>
+
+  <dialog id="leaderDetailDialog" class="reviews-dialog detail-dialog">
+    <div class="dialog-head">
+      <h3 id="leaderDetailTitle">Restaurant Detail</h3>
+      <button id="closeLeaderDetailBtn" class="button button-secondary small-button" type="button">Close</button>
+    </div>
+    <div id="leaderDetailContent"></div>
   </dialog>
 
   <script src="app.js"></script>
